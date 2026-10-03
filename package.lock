@@ -1,0 +1,8 @@
+prefixes:
+  morse: toit-morse
+packages:
+  toit-morse:
+    url: github.com/toitware/toit-morse
+    name: morse
+    version: 1.0.6
+    hash: f9f6ba3a04984db16887d7a1051ada8ad30d7db2
