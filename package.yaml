@@ -1,0 +1,8 @@
+name: pwmledmixer
+description: Basic PWM LED mixer designed to support dual channel CCT LED strips.
+environment:
+  sdk: ^2.0.0-alpha.195
+dependencies:
+  morse:
+    url: github.com/toitware/toit-morse
+    version: ^1.0.6
