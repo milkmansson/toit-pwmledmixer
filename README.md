@@ -52,6 +52,12 @@ Applying gamma correction to the brightness multiplier instead:
 - or a 50/50 mix, warm = 0.5 * B^γ, cool = 0.5 * B^γ, so the sum is still B^γ.
 - mixes no longer look dimmer than endpoints at the same requested brightness.
 
+## PWM frequency and duty resolution
+The constructors take `--pwm-frequency` (Hz, default 10000).  The frequency also decides how fine the duty steps are, because the PWM counter has a fixed clock: the higher the frequency, the fewer steps fit in one period.  On an ESP32-C6, where Toit uses a clock of about 17.5 MHz (an estimate), 10 kHz gives about 10 bits (1023 steps), 2 kHz about 13 bits and 800 Hz about 14 bits.  The resolution is fixed when the PWM is created, so choose the frequency at construction.
+- A strip is best left at the default, which is free of visible flicker.
+- A very faint indicator LED benefits from a lower frequency: its dimmest step gets dimmer.  The cost is flicker, which is more visible at lower frequencies, so check it by eye.
+- The resolution depends on the chip's clock and is rounded down to whole bits, so measure it (set a duty factor of 0.5 and read `duty-factor` back) if it matters.
+
 ## What are Mireds?
 [Mireds](https://en.wikipedia.org/wiki/Mired) (MIcro REciprocal Degrees) is a unit of measurement used to express color temperature. Values in mireds are calculated by the formula:
     M = 1 000 000 K T , {\displaystyle M={\frac {1\,000\,000\,{\text{K}}}{T}},}

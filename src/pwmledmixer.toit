@@ -17,6 +17,14 @@ See README.md.
 */
 
 class PwmLedMixer:
+  /**
+  The default PWM frequency, in Hz.
+
+  The PWM frequency also sets the duty resolution: a lower frequency gives more, finer duty steps
+    (a faint LED can then go dimmer), a higher one gives fewer. See the `--pwm-frequency` argument
+    of the constructors.
+  */
+  static DEFAULT-PWM-FREQUENCY           ::= 10_000
   static DEFAULT-GAMMA-CORRECTION-FACTOR ::= 2.2
   static DEFAULT-COOL-CHANNEL-TEMP       ::= 6000  // 100% Cool White Channel Temp in Kelvin
   static DEFAULT-WARM-CHANNEL-TEMP       ::= 3000  // 100% Warm White Channel Temp in Kelvin
@@ -27,6 +35,7 @@ class PwmLedMixer:
   mix_/Map                           := {:}  // caches mix of channels (eg at 100%)
   brightness_/float                  := 0.0  // caches intended brightness
   temperature_/int                   := 0    // caches intended temperature
+  pwm-frequency_/int                 := DEFAULT-PWM-FREQUENCY
   pwm-generator_                     := ?
   task_/Map                          := {:}
   logger_/log.Logger                 := ?
@@ -40,6 +49,9 @@ class PwmLedMixer:
                                [0.0, 0.385]]  // Wait (little longer)
 
   // Constructor specifically for dual channel (CCT Strips)
+  //
+  // The $pwm-frequency (Hz) also sets the duty resolution, which is fixed when the PWM is created
+  // (a lower frequency gives finer duty steps). The default is $DEFAULT-PWM-FREQUENCY.
   constructor
       --warm-pin
       --cool-pin
@@ -48,10 +60,12 @@ class PwmLedMixer:
       --warm-gain=1.0
       --cool-gain=1.0
       --initial-brightness=1.0
+      --pwm-frequency/int=DEFAULT-PWM-FREQUENCY
       --logger/log.Logger=log.default:
 
     logger_                   = logger.with-name "pwmledmixer2"
-    pwm-generator_            = pwm.Pwm --frequency=10000
+    pwm-frequency_            = pwm-frequency
+    pwm-generator_            = pwm.Pwm --frequency=pwm-frequency
     channels_[warm-temp]      = pwm-generator_.start warm-pin
     channels_[cool-temp]      = pwm-generator_.start cool-pin
     gain-values_[warm-temp]   = warm-gain
@@ -63,13 +77,19 @@ class PwmLedMixer:
     set-brightness_ initial-brightness
 
   // Constructor for other items like a LED on a Pin
+  //
+  // The $pwm-frequency (Hz) also sets the duty resolution, which is fixed when the PWM is created
+  // (a lower frequency gives finer duty steps, so a faint LED can go dimmer). The default is
+  // $DEFAULT-PWM-FREQUENCY.
   constructor
       --led-pin/int
       --colour/string="(undefined)"  // Not important for now, cosmetic only
       --initial-brightness=1.0
+      --pwm-frequency/int=DEFAULT-PWM-FREQUENCY
       --logger/log.Logger=log.default:
     logger_                   = logger.with-name "pwmledmixer2"
-    pwm-generator_            = pwm.Pwm --frequency=10000
+    pwm-frequency_            = pwm-frequency
+    pwm-generator_            = pwm.Pwm --frequency=pwm-frequency
     channels_[colour]         = pwm-generator_.start led-pin
     gain-values_[colour]      = 1.0
     mix_[colour]              = 1.0
